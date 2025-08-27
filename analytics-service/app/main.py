@@ -6,7 +6,11 @@ import os
 
 HEALTH_DATA_SERVICE_URL = os.getenv("HEALTH_DATA_SERVICE_URL", "http://localhost:8003")
 
-app = FastAPI()
+app = FastAPI(
+    title="Analytics Service",
+    description="Health analytics and statistics microservice for calculating health scores and activity metrics",
+    version="1.0.0"
+)
 
 
 class HealthScoreResponse(BaseModel):
@@ -27,6 +31,15 @@ class ActivityStatsResponse(BaseModel):
     average_duration: float
     average_calories: float
     activities: list[dict]
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for the analytics service"""
+    return {
+        "status": "healthy",
+        "service": "analytics-service"
+    }
 
 
 @app.get("/users/{user_id}/get_health_score", response_model=HealthScoreResponse)

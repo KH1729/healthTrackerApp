@@ -114,7 +114,11 @@ class BloodTestOut(BloodTestBase):
         from_attributes = True
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Health Data Service",
+    description="Health data management microservice for physical activities, sleep, and blood tests",
+    version="1.0.0"
+)
 
 
 def get_db():
@@ -158,6 +162,16 @@ async def validate_blood_test_unit(units_id: int):
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for the health data service"""
+    return {
+        "status": "healthy",
+        "service": "health-data-service",
+        "database": "connected" if engine else "disconnected"
+    }
 
 
 @app.post("/physical_activities/", response_model=PhysicalActivityOut)

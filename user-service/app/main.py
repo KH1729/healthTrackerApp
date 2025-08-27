@@ -34,7 +34,11 @@ class UserOut(UserBase):
         from_attributes = True
 
 
-app = FastAPI()
+app = FastAPI(
+    title="User Service",
+    description="User management microservice for the Health Tracker application",
+    version="1.0.0"
+)
 
 
 def get_db():
@@ -48,6 +52,16 @@ def get_db():
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for the user service"""
+    return {
+        "status": "healthy",
+        "service": "user-service",
+        "database": "connected" if engine else "disconnected"
+    }
 
 
 @app.post("/users/", response_model=UserOut)

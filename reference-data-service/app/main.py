@@ -33,7 +33,11 @@ class NameOut(NameBase):
         from_attributes = True
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Reference Data Service",
+    description="Reference data management microservice for activity types and blood test units",
+    version="1.0.0"
+)
 
 
 def get_db():
@@ -47,6 +51,16 @@ def get_db():
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for the reference data service"""
+    return {
+        "status": "healthy",
+        "service": "reference-data-service",
+        "database": "connected" if engine else "disconnected"
+    }
 
 
 @app.post("/activity_types/", response_model=NameOut)
