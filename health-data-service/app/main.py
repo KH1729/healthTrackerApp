@@ -191,7 +191,9 @@ def list_physical_activities(skip: int = 0, limit: int = 100, db: Session = Depe
 
 
 @app.get("/users/{user_id}/physical_activities/", response_model=list[PhysicalActivityOut])
-def list_user_physical_activities(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def list_user_physical_activities(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Temporarily disable validation to test routing
+    # await validate_user(user_id)
     return db.query(PhysicalActivity).filter(PhysicalActivity.user_id == user_id).offset(skip).limit(limit).all()
 
 
@@ -211,7 +213,8 @@ def list_sleep_activities(skip: int = 0, limit: int = 100, db: Session = Depends
 
 
 @app.get("/users/{user_id}/sleep_activities/", response_model=list[SleepActivityOut])
-def list_user_sleep_activities(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def list_user_sleep_activities(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    await validate_user(user_id)
     return db.query(SleepActivity).filter(SleepActivity.user_id == user_id).offset(skip).limit(limit).all()
 
 
@@ -232,5 +235,6 @@ def list_blood_tests(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 
 
 @app.get("/users/{user_id}/blood_tests/", response_model=list[BloodTestOut])
-def list_user_blood_tests(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+async def list_user_blood_tests(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    await validate_user(user_id)
     return db.query(BloodTest).filter(BloodTest.user_id == user_id).offset(skip).limit(limit).all()

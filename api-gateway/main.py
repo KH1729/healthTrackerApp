@@ -205,15 +205,28 @@ async def proxy_physical(path: str, request: Request):
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/{path}")
 
 
-@app.api_route("/users/{user_id}/physical_activities/{path:path}", methods=["GET", "POST"], tags=["Physical Activities"])
-async def proxy_user_physical(user_id: int, path: str, request: Request):
+@app.api_route("/users/{user_id}/physical_activities/", methods=["GET", "POST"], tags=["Physical Activities"])
+async def proxy_user_physical_base(user_id: int, request: Request):
     """
-    User-Specific Physical Activities
+    User-Specific Physical Activities (Base)
     
     Manage physical activities for a specific user.
     
     - **GET**: Retrieve all physical activities for a user
     - **POST**: Create new physical activity for a user
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/physical_activities/")
+
+
+@app.api_route("/users/{user_id}/physical_activities/{path:path}", methods=["GET", "POST"], tags=["Physical Activities"])
+async def proxy_user_physical(user_id: int, path: str, request: Request):
+    """
+    User-Specific Physical Activities (With Path)
+    
+    Manage physical activities for a specific user with additional path parameters.
+    
+    - **GET**: Retrieve specific physical activity for a user
+    - **POST**: Create new physical activity for a user with specific parameters
     """
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/physical_activities/{path}")
 
@@ -234,15 +247,28 @@ async def proxy_sleep(path: str, request: Request):
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/sleep_activities/{path}")
 
 
-@app.api_route("/users/{user_id}/sleep_activities/{path:path}", methods=["GET", "POST"], tags=["Sleep Activities"])
-async def proxy_user_sleep(user_id: int, path: str, request: Request):
+@app.api_route("/users/{user_id}/sleep_activities/", methods=["GET", "POST"], tags=["Sleep Activities"])
+async def proxy_user_sleep_base(user_id: int, request: Request):
     """
-    User-Specific Sleep Activities
+    User-Specific Sleep Activities (Base)
     
     Manage sleep activities for a specific user.
     
     - **GET**: Retrieve all sleep activities for a user
     - **POST**: Create new sleep activity for a user
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/")
+
+
+@app.api_route("/users/{user_id}/sleep_activities/{path:path}", methods=["GET", "POST"], tags=["Sleep Activities"])
+async def proxy_user_sleep(user_id: int, path: str, request: Request):
+    """
+    User-Specific Sleep Activities (With Path)
+    
+    Manage sleep activities for a specific user with additional path parameters.
+    
+    - **GET**: Retrieve specific sleep activity for a user
+    - **POST**: Create new sleep activity for a user with specific parameters
     """
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/{path}")
 
@@ -263,15 +289,28 @@ async def proxy_blood(path: str, request: Request):
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/blood_tests/{path}")
 
 
-@app.api_route("/users/{user_id}/blood_tests/{path:path}", methods=["GET", "POST"], tags=["Blood Tests"])
-async def proxy_user_blood(user_id: int, path: str, request: Request):
+@app.api_route("/users/{user_id}/blood_tests/", methods=["GET", "POST"], tags=["Blood Tests"])
+async def proxy_user_blood_base(user_id: int, request: Request):
     """
-    User-Specific Blood Tests
+    User-Specific Blood Tests (Base)
     
     Manage blood tests for a specific user.
     
     - **GET**: Retrieve all blood tests for a user
     - **POST**: Create new blood test for a user
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/")
+
+
+@app.api_route("/users/{user_id}/blood_tests/{path:path}", methods=["GET", "POST"], tags=["Blood Tests"])
+async def proxy_user_blood(user_id: int, path: str, request: Request):
+    """
+    User-Specific Blood Tests (With Path)
+    
+    Manage blood tests for a specific user with additional path parameters.
+    
+    - **GET**: Retrieve specific blood test for a user
+    - **POST**: Create new blood test for a user with specific parameters
     """
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/{path}")
 
@@ -379,15 +418,21 @@ async def _proxy(request: Request, url: str):
     headers = dict(request.headers)
     data = await request.body()
     
+    print(f"DEBUG: Proxying {method} request to {url}")
+    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.request(method, url, headers=headers, content=data, params=dict(request.query_params), timeout=30.0)
+            print(f"DEBUG: Response status: {resp.status_code}")
             if resp.status_code >= 400:
+                print(f"DEBUG: Error response: {resp.text}")
                 raise HTTPException(status_code=resp.status_code, detail=f"Service error: {resp.text}")
             return resp.json()
         except httpx.TimeoutException:
+            print("DEBUG: Timeout exception")
             raise HTTPException(status_code=504, detail="Service timeout")
         except Exception as e:
+            print(f"DEBUG: Exception: {str(e)}")
             raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
 
 
