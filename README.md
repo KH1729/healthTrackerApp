@@ -20,7 +20,6 @@ The application is built using a microservices architecture with 6 independent s
 - **Health Score Calculation**: Advanced algorithms to calculate overall health scores based on multiple factors
 - **Activity Statistics**: Detailed analytics for daily, weekly, and monthly activity patterns
 - **FHIR Integration**: External API integration for healthcare data standards
-- **Microservices Architecture**: Scalable, maintainable, and team-friendly development approach
 
 ## Database Schema
 
@@ -44,7 +43,7 @@ Each service owns its data with separate PostgreSQL databases:
 
 1. **Clone and navigate to the project**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/KH1729/healthTrackerApp
    cd healthTrackerApp
    ```
 
@@ -117,14 +116,6 @@ async def validate_user(user_id: int):
         if resp.status_code != 200:
             raise HTTPException(status_code=404, detail="User not found")
 ```
-
-### Adding New Features
-
-1. **Identify the service** that should own the feature
-2. **Add the endpoint** to the appropriate service
-3. **Update the API Gateway** to route the new endpoint
-4. **Add tests** for the new functionality
-
 ### Local Development
 
 For individual service development:
@@ -157,16 +148,6 @@ View service logs:
 ```bash
 docker-compose logs -f [service-name]
 ```
-
-## Production Considerations
-
-- **Authentication/Authorization**: Implement JWT or OAuth2
-- **Service Mesh**: Use Istio or Linkerd for advanced routing
-- **Monitoring**: Add Prometheus and Grafana
-- **Caching**: Implement Redis for frequently accessed data
-- **Message Queue**: Use RabbitMQ or Kafka for async communication
-- **Secrets Management**: Use Docker Secrets or external vault
-
 ## FHIR Integration
 
 The integration service connects to external FHIR servers:
