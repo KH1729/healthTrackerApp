@@ -23,7 +23,7 @@ The application is built using a microservices architecture with 6 independent s
 
 ## Database Schema
 
-Each service owns its data with separate PostgreSQL databases:
+All services share a single PostgreSQL database (`health_tracker_db`) with the following tables:
 
 - **User Service**: `users` table (id, username, email, password)
 - **Reference Data Service**: `activity_types`, `blood_test_units` tables
@@ -71,6 +71,13 @@ Each service owns its data with separate PostgreSQL databases:
 - **Analytics Service**: 8004
 - **Integration Service**: 8005
 
+### Database Access
+
+- **Shared Database**: localhost:5432
+- **Database Name**: health_tracker_db
+- **Username**: user
+- **Password**: password
+
 ## API Endpoints
 
 ### User Management
@@ -116,6 +123,7 @@ async def validate_user(user_id: int):
         if resp.status_code != 200:
             raise HTTPException(status_code=404, detail="User not found")
 ```
+
 ### Local Development
 
 For individual service development:
@@ -135,7 +143,7 @@ The analytics service calculates health scores based on:
 
 Scores are normalized to 0-100 scale with personalized recommendations.
 
-## 🔍 Monitoring
+## Monitoring
 
 ### Health Checks
 Each service provides health monitoring:
@@ -148,6 +156,7 @@ View service logs:
 ```bash
 docker-compose logs -f [service-name]
 ```
+
 ## FHIR Integration
 
 The integration service connects to external FHIR servers:

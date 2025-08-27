@@ -21,25 +21,25 @@ services:
   user-service:
     build: ./user-service
     environment:
-      DATABASE_URL: postgresql://user:password@user-db/user_db
+      DATABASE_URL: postgresql://user:password@shared-db/health_tracker_db
     depends_on:
-      - user-db
+      - shared-db
 
   reference-data-service:
     build: ./reference-data-service
     environment:
-      DATABASE_URL: postgresql://user:password@refdata-db/refdata_db
+      DATABASE_URL: postgresql://user:password@shared-db/health_tracker_db
     depends_on:
-      - refdata-db
+      - shared-db
 
   health-data-service:
     build: ./health-data-service
     environment:
-      DATABASE_URL: postgresql://user:password@healthdata-db/healthdata_db
+      DATABASE_URL: postgresql://user:password@shared-db/health_tracker_db
       USER_SERVICE_URL: http://user-service:8000
       REF_DATA_SERVICE_URL: http://reference-data-service:8000
     depends_on:
-      - healthdata-db
+      - shared-db
       - user-service
       - reference-data-service
 
@@ -51,32 +51,19 @@ services:
   integration-service:
     build: ./integration-service
 
-  user-db:
+  shared-db:
     image: postgres:16
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: user_db
+      POSTGRES_DB: health_tracker_db
     ports:
-      - "5433:5432"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  refdata-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: refdata_db
-    ports:
-      - "5434:5432"
-
-  healthdata-db:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: healthdata_db
-    ports:
-      - "5435:5432"
+volumes:
+  postgres_data:
 
 networks:
   default:
