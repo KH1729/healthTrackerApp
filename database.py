@@ -28,12 +28,21 @@ class PhysicalActivity(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    activity_type = Column(String)
+    activity_type_id = Column(Integer, ForeignKey("activity_types.id"))
     duration_minutes = Column(Integer)
     calories_burned = Column(Integer)
     date = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="physical_activities")
+    activity_type = relationship("ActivityType", back_populates="physical_activities")
+
+class ActivityType(Base):
+    __tablename__ = "activity_types"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    physical_activities = relationship("PhysicalActivity", back_populates="activity_type")
 
 
 class SleepActivity(Base):
@@ -55,7 +64,18 @@ class BloodTest(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     test_name = Column(String)
     test_result = Column(Float)
-    units = Column(String)
+    units_id = Column(Integer, ForeignKey("blood_test_units.id"))
     date = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="blood_tests")
+    units = relationship("BloodTestUnits", back_populates="blood_tests")
+
+class BloodTestUnits(Base):
+    __tablename__ = "blood_test_units"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    blood_tests = relationship("BloodTest", back_populates="units")
+
+

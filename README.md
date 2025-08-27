@@ -1,123 +1,209 @@
-# Health Tracker API
+# Health Tracker App - Microservices Architecture
 
-This is a RESTful API for a Health Tracker Application, built with FastAPI and SQLAlchemy. It allows users to track and analyze their health data, including Physical Activity, Sleep Activity, and Blood Tests. It also provides an aggregation endpoint to calculate a user's health score and demonstrates integration with an external FHIR-based API.
+This is a comprehensive Health Tracker Application built with a microservices architecture using FastAPI. It allows users to track and analyze their health data, including Physical Activity, Sleep Activity, and Blood Tests. The application provides health score calculations, statistics, and integrates with external FHIR-based APIs.
 
-## Features
+## 🏗️ Architecture Overview
 
-- User Management: Basic CRUD operations for user accounts.
-- Health Data Management: CRUD operations for Physical Activity, Sleep Activity, and Blood Test records.
-- Health Score Calculation: An endpoint to aggregate health data, calculate a health score, and compare it to other users in the system.
-- FHIR Compliant Output: Health scores are returned in a FHIR-compliant Observation resource format.
-- External FHIR API Integration: Example endpoint to fetch Patient resources from a public FHIR API.
+The application is built using a microservices architecture with 6 independent services:
 
-## Database Schema
+1. **API Gateway** - Single entry point for all client requests
+2. **User Service** - Manages user accounts and authentication
+3. **Reference Data Service** - Manages activity types and blood test units
+4. **Health Data Service** - Manages physical activities, sleep, and blood tests
+5. **Analytics Service** - Calculates health scores and statistics
+6. **Integration Service** - Handles external FHIR API integration
 
-The application uses a PostgreSQL relational database with the following tables:
+## ✨ Features
 
-- `users`: Stores user information (id, username, email, password).
-- `physical_activities`: Stores physical activity records (id, user_id, activity_type, duration_minutes, calories_burned, date).
-- `sleep_activities`: Stores sleep activity records (id, user_id, sleep_duration_hours, sleep_quality, date).
-- `blood_tests`: Stores blood test records (id, user_id, test_name, test_result, units, date).
+- **User Management**: Complete CRUD operations for user accounts
+- **Health Data Tracking**: Record and manage physical activities, sleep patterns, and blood test results
+- **Health Score Calculation**: Advanced algorithms to calculate overall health scores based on multiple factors
+- **Activity Statistics**: Detailed analytics for daily, weekly, and monthly activity patterns
+- **FHIR Integration**: External API integration for healthcare data standards
+- **Microservices Architecture**: Scalable, maintainable, and team-friendly development approach
 
-## Setup and Installation
+## 🗄️ Database Schema
 
-Follow these steps to set up and run the Health Tracker API locally.
+Each service owns its data with separate PostgreSQL databases:
+
+- **User Service**: `users` table (id, username, email, password)
+- **Reference Data Service**: `activity_types`, `blood_test_units` tables
+- **Health Data Service**: 
+  - `physical_activities` (id, user_id, activity_type_id, duration, calories, date, timestamp)
+  - `sleep_activities` (id, user_id, hours, quality, date)
+  - `blood_tests` (id, user_id, test_name, value, units_id, date)
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.9+ (or the version you provided: Python313)
-- PostgreSQL database server
+- Docker and Docker Compose
+- Git
 
-### 1. Clone the repository (if applicable) and navigate to the project directory
+### Running the Application
 
-```bash
-git clone <your-repository-url>
-cd health_tracker_api
-```
+1. **Clone and navigate to the project**:
+   ```bash
+   git clone <repository-url>
+   cd healthTrackerApp
+   ```
 
-### 2. Create and Activate a Virtual Environment
+2. **Start all services**:
+   ```bash
+   docker-compose up -d
+   ```
 
-It's recommended to use a virtual environment to manage dependencies.
+3. **Check service status**:
+   ```bash
+   docker-compose ps
+   ```
 
-```bash
-# On Windows
-<path_to_your_python_executable> -m venv venv
-.\venv\Scripts\activate
+4. **Access the application**:
+   - **API Gateway**: http://localhost:8080
+   - **API Documentation**: http://localhost:8080/docs
+   - **Health Checks**: Each service has `/health` endpoint
 
-# On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-```
+### Service Ports (for debugging)
 
-Replace `<path_to_your_python_executable>` with the actual path you provided (e.g., `C:\Users\USER\AppData\Local\Programs\Python\Python313\python.exe`).
+- **API Gateway**: 8080
+- **User Service**: 8001
+- **Reference Data Service**: 8002
+- **Health Data Service**: 8003
+- **Analytics Service**: 8004
+- **Integration Service**: 8005
 
-### 3. Install Dependencies
+## 📋 API Endpoints
 
-Install the required Python packages using pip:
+### User Management
+- `POST /users/` - Create a new user
+- `GET /users/` - List all users
+- `GET /users/{user_id}` - Get specific user
+- `PUT /users/{user_id}` - Update user
+- `DELETE /users/{user_id}` - Delete user
 
-```bash
-pip install -r requirements.txt
-```
+### Reference Data
+- `POST /activity_types/` - Create activity type
+- `GET /activity_types/` - List activity types
+- `POST /blood_test_units/` - Create blood test unit
+- `GET /blood_test_units/` - List blood test units
 
-### 4. Configure Database Connection
+### Health Data
+- `POST /physical_activities/` - Create physical activity
+- `GET /users/{user_id}/physical_activities/` - Get user's activities
+- `POST /sleep_activities/` - Create sleep activity
+- `GET /users/{user_id}/sleep_activities/` - Get user's sleep data
+- `POST /blood_tests/` - Create blood test
+- `GET /users/{user_id}/blood_tests/` - Get user's blood tests
 
-Open `database.py` and update the `SQLALCHEMY_DATABASE_URL` with your PostgreSQL database connection string. Make sure the database `health_tracker_db` exists on your PostgreSQL server.
+### Analytics
+- `GET /users/{user_id}/get_health_score` - Calculate health score
+- `GET /users/{user_id}/physical_activities/stats/last_day` - Daily statistics
+- `GET /users/{user_id}/physical_activities/stats/last_week` - Weekly statistics
+- `GET /users/{user_id}/physical_activities/stats/last_month` - Monthly statistics
 
+### External Integration
+- `GET /fhir_patient/{patient_id}` - Fetch FHIR patient data
+
+## 🔧 Development
+
+### Service Communication
+
+Services communicate via HTTP calls with validation:
 ```python
-# database.py
-SQLALCHEMY_DATABASE_URL = "postgresql://user:password@localhost/health_tracker_db"
+# Example: Health Data Service validates user exists
+async def validate_user(user_id: int):
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(f"{USER_SERVICE_URL}/users/{user_id}")
+        if resp.status_code != 200:
+            raise HTTPException(status_code=404, detail="User not found")
 ```
 
-### 5. Run the Application
+### Adding New Features
 
-Start the FastAPI application using Uvicorn:
+1. **Identify the service** that should own the feature
+2. **Add the endpoint** to the appropriate service
+3. **Update the API Gateway** to route the new endpoint
+4. **Add tests** for the new functionality
 
+### Local Development
+
+For individual service development:
 ```bash
-uvicorn main:app --reload
+# Run specific service locally
+cd user-service
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8001
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+## 📊 Health Score Calculation
 
-## API Endpoints
+The analytics service calculates health scores based on:
+- **Physical Activity**: Duration and calories burned
+- **Sleep Quality**: Hours of sleep and quality metrics
+- **Blood Test Results**: Medical test values and trends
 
-Once the application is running, you can access the API documentation (Swagger UI) at `http://127.0.0.1:8000/docs` to test the endpoints.
+Scores are normalized to 0-100 scale with personalized recommendations.
 
-### User Endpoints
+## 🔍 Monitoring
 
-- `POST /users/`: Create a new user.
-- `GET /users/`: Get a list of all users.
-- `GET /users/{user_id}`: Get a specific user by ID.
-- `PUT /users/{user_id}`: Update an existing user.
-- `DELETE /users/{user_id}`: Delete a user.
+### Health Checks
+Each service provides health monitoring:
+```bash
+curl http://localhost:8080/health
+```
 
-### Physical Activity Endpoints
+### Logs
+View service logs:
+```bash
+docker-compose logs -f [service-name]
+```
 
-- `POST /users/{user_id}/physical_activities/`: Create a new physical activity record for a user.
-- `GET /users/{user_id}/physical_activities/`: Get all physical activity records for a user.
-- `GET /physical_activities/{activity_id}`: Get a specific physical activity record by ID.
-- `PUT /physical_activities/{activity_id}`: Update a physical activity record.
-- `DELETE /physical_activities/{activity_id}`: Delete a physical activity record.
+## 🛠️ Production Considerations
 
-### Sleep Activity Endpoints
+- **Authentication/Authorization**: Implement JWT or OAuth2
+- **Service Mesh**: Use Istio or Linkerd for advanced routing
+- **Monitoring**: Add Prometheus and Grafana
+- **Caching**: Implement Redis for frequently accessed data
+- **Message Queue**: Use RabbitMQ or Kafka for async communication
+- **Secrets Management**: Use Docker Secrets or external vault
 
-- `POST /users/{user_id}/sleep_activities/`: Create a new sleep activity record for a user.
-- `GET /users/{user_id}/sleep_activities/`: Get all sleep activity records for a user.
-- `GET /sleep_activities/{sleep_id}`: Get a specific sleep activity record by ID.
-- `PUT /sleep_activities/{sleep_id}`: Update a sleep activity record.
-- `DELETE /sleep_activities/{sleep_id}`: Delete a sleep activity record.
+## 🏥 FHIR Integration
 
-### Blood Test Endpoints
+The integration service connects to external FHIR servers:
+- **Patient Resources**: Fetch patient information
+- **Observation Resources**: Health score output in FHIR format
+- **Error Handling**: Graceful degradation when external services are unavailable
 
-- `POST /users/{user_id}/blood_tests/`: Create a new blood test record for a user.
-- `GET /users/{user_id}/blood_tests/`: Get all blood test records for a user.
-- `GET /blood_tests/{blood_test_id}`: Get a specific blood test record by ID.
-- `PUT /blood_tests/{blood_test_id}`: Update a blood test record.
-- `DELETE /blood_tests/{blood_test_id}`: Delete a blood test record.
+## 📈 Benefits of Microservices
 
-### Health Score Endpoint
+- **Scalability**: Scale individual services based on demand
+- **Team Development**: Different teams can work on different services
+- **Technology Flexibility**: Each service can use different technologies
+- **Fault Isolation**: Issues in one service don't affect others
+- **Deployment Independence**: Deploy services independently
 
-- `GET /users/{user_id}/get_health_score`: Calculate and retrieve the health score for a user.
+## 🚨 Troubleshooting
 
-### External FHIR API Endpoint
+### Common Issues
 
-- `GET /fhir_patient/{patient_id}`: Fetch a Patient resource from a public FHIR API.
+1. **Service not starting**: Check Docker logs
+   ```bash
+   docker-compose logs [service-name]
+   ```
+
+2. **Database connection issues**: Ensure PostgreSQL containers are running
+   ```bash
+   docker-compose ps
+   ```
+
+3. **Service communication errors**: Verify environment variables in docker-compose.yml
+
+### Reset Everything
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+## 📝 License
+
+This project is licensed under the MIT License.
