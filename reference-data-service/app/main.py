@@ -55,7 +55,6 @@ def on_startup():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for the reference data service"""
     return {
         "status": "healthy",
         "service": "reference-data-service",

@@ -56,7 +56,6 @@ def on_startup():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for the user service"""
     return {
         "status": "healthy",
         "service": "user-service",

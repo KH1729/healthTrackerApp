@@ -35,7 +35,6 @@ class ActivityStatsResponse(BaseModel):
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for the analytics service"""
     return {
         "status": "healthy",
         "service": "analytics-service"

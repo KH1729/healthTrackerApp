@@ -166,7 +166,6 @@ def on_startup():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for the health data service"""
     return {
         "status": "healthy",
         "service": "health-data-service",
@@ -192,8 +191,7 @@ def list_physical_activities(skip: int = 0, limit: int = 100, db: Session = Depe
 
 @app.get("/users/{user_id}/physical_activities/", response_model=list[PhysicalActivityOut])
 async def list_user_physical_activities(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    # Temporarily disable validation to test routing
-    # await validate_user(user_id)
+    await validate_user(user_id)
     return db.query(PhysicalActivity).filter(PhysicalActivity.user_id == user_id).offset(skip).limit(limit).all()
 
 

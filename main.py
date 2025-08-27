@@ -394,7 +394,6 @@ def get_health_score(user_id: int, db: Session = Depends(get_db)):
 # Physical Activity Statistics Endpoints
 @app.get("/users/{user_id}/physical_activities/stats/last_day")
 def get_last_day_activity_stats(user_id: int, db: Session = Depends(get_db)):
-    """Get physical activity statistics for the last 24 hours"""
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -447,7 +446,6 @@ def get_last_day_activity_stats(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/users/{user_id}/physical_activities/stats/last_week")
 def get_last_week_activity_stats(user_id: int, db: Session = Depends(get_db)):
-    """Get physical activity statistics for the last 7 days (average)"""
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -500,7 +498,6 @@ def get_last_week_activity_stats(user_id: int, db: Session = Depends(get_db)):
 
 @app.get("/users/{user_id}/physical_activities/stats/last_month")
 def get_last_month_activity_stats(user_id: int, db: Session = Depends(get_db)):
-    """Get physical activity statistics for the last 30 days (average)"""
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")

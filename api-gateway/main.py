@@ -142,20 +142,52 @@ async def health_check():
     }
 
 
-# User Management Endpoints
-@app.api_route("/users/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["User Management"])
-async def proxy_users(path: str, request: Request):
+@app.get("/test-routing")
+async def test_routing():
     """
-    User Management Operations
-    
-    - **GET**: Retrieve user information
-    - **POST**: Create a new user account
-    - **PUT**: Update existing user information
-    - **DELETE**: Remove a user account
-    
-    All user-related operations are handled by the User Service.
+    Test routing endpoint to verify API Gateway is working.
     """
-    return await _proxy(request, f"{USER_SERVICE_URL}/users/{path}")
+    print("DEBUG: Test routing endpoint called")
+    return {"message": "API Gateway routing is working"}
+
+
+@app.get("/test-user/{user_id}")
+async def test_user_routing(user_id: int):
+    """
+    Test user-specific routing.
+    """
+    print(f"DEBUG: Test user routing called for user {user_id}")
+    return {"message": f"User routing working for user {user_id}"}
+
+
+@app.get("/test-simple")
+async def test_simple_routing():
+    """
+    Test simple routing without parameters.
+    """
+    print("DEBUG: Test simple routing called")
+    return {"message": "Simple routing working"}
+
+
+@app.get("/test-physical/{user_id}")
+async def test_physical_routing(user_id: int):
+    """
+    Test physical activities routing.
+    """
+    print(f"DEBUG: Test physical routing called for user {user_id}")
+    return {"message": f"Physical routing working for user {user_id}"}
+
+
+@app.get("/test-users/{user_id}")
+async def test_users_routing(user_id: int):
+    """
+    Test users routing pattern.
+    """
+    print(f"DEBUG: Test users routing called for user {user_id}")
+    return {"message": f"Users routing working for user {user_id}"}
+
+
+
 
 
 # Reference Data Endpoints
@@ -190,161 +222,60 @@ async def proxy_units(path: str, request: Request):
 
 
 # Physical Activities Endpoints
-@app.api_route("/physical_activities/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Physical Activities"])
-async def proxy_physical(path: str, request: Request):
+@app.get("/physical_activities/", tags=["Physical Activities"])
+async def proxy_physical_get(request: Request):
     """
-    Physical Activities Management
-    
-    Record and manage physical exercise activities with duration, calories, and type.
-    
-    - **GET**: Retrieve physical activities
-    - **POST**: Create new physical activity record
-    - **PUT**: Update physical activity record
-    - **DELETE**: Remove physical activity record
+    Get all physical activities.
     """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/{path}")
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/")
 
 
-@app.api_route("/users/{user_id}/physical_activities/", methods=["GET", "POST"], tags=["Physical Activities"])
-async def proxy_user_physical_base(user_id: int, request: Request):
+@app.post("/physical_activities/", tags=["Physical Activities"])
+async def proxy_physical_post(request: Request):
     """
-    User-Specific Physical Activities (Base)
-    
-    Manage physical activities for a specific user.
-    
-    - **GET**: Retrieve all physical activities for a user
-    - **POST**: Create new physical activity for a user
+    Create a new physical activity.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/")
+
+
+@app.get("/physical_activities/{activity_id}", tags=["Physical Activities"])
+async def proxy_physical_get_by_id(activity_id: int, request: Request):
+    """
+    Get a specific physical activity by ID.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/{activity_id}")
+
+
+@app.put("/physical_activities/{activity_id}", tags=["Physical Activities"])
+async def proxy_physical_put(activity_id: int, request: Request):
+    """
+    Update a specific physical activity.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/{activity_id}")
+
+
+@app.delete("/physical_activities/{activity_id}", tags=["Physical Activities"])
+async def proxy_physical_delete(activity_id: int, request: Request):
+    """
+    Delete a specific physical activity.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/physical_activities/{activity_id}")
+
+
+@app.get("/users/{user_id}/physical_activities/", tags=["Physical Activities"])
+async def proxy_user_physical_get(user_id: int, request: Request):
+    """
+    Get all physical activities for a specific user.
     """
     return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/physical_activities/")
 
 
-@app.api_route("/users/{user_id}/physical_activities/{path:path}", methods=["GET", "POST"], tags=["Physical Activities"])
-async def proxy_user_physical(user_id: int, path: str, request: Request):
+@app.post("/users/{user_id}/physical_activities/", tags=["Physical Activities"])
+async def proxy_user_physical_post(user_id: int, request: Request):
     """
-    User-Specific Physical Activities (With Path)
-    
-    Manage physical activities for a specific user with additional path parameters.
-    
-    - **GET**: Retrieve specific physical activity for a user
-    - **POST**: Create new physical activity for a user with specific parameters
+    Create a new physical activity for a specific user.
     """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/physical_activities/{path}")
-
-
-# Sleep Activities Endpoints
-@app.api_route("/sleep_activities/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Sleep Activities"])
-async def proxy_sleep(path: str, request: Request):
-    """
-    Sleep Activities Management
-    
-    Record and analyze sleep patterns, duration, and quality.
-    
-    - **GET**: Retrieve sleep activities
-    - **POST**: Create new sleep activity record
-    - **PUT**: Update sleep activity record
-    - **DELETE**: Remove sleep activity record
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/sleep_activities/{path}")
-
-
-@app.api_route("/users/{user_id}/sleep_activities/", methods=["GET", "POST"], tags=["Sleep Activities"])
-async def proxy_user_sleep_base(user_id: int, request: Request):
-    """
-    User-Specific Sleep Activities (Base)
-    
-    Manage sleep activities for a specific user.
-    
-    - **GET**: Retrieve all sleep activities for a user
-    - **POST**: Create new sleep activity for a user
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/")
-
-
-@app.api_route("/users/{user_id}/sleep_activities/{path:path}", methods=["GET", "POST"], tags=["Sleep Activities"])
-async def proxy_user_sleep(user_id: int, path: str, request: Request):
-    """
-    User-Specific Sleep Activities (With Path)
-    
-    Manage sleep activities for a specific user with additional path parameters.
-    
-    - **GET**: Retrieve specific sleep activity for a user
-    - **POST**: Create new sleep activity for a user with specific parameters
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/{path}")
-
-
-# Blood Tests Endpoints
-@app.api_route("/blood_tests/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Blood Tests"])
-async def proxy_blood(path: str, request: Request):
-    """
-    Blood Tests Management
-    
-    Store and manage blood test results with values and measurement units.
-    
-    - **GET**: Retrieve blood tests
-    - **POST**: Create new blood test record
-    - **PUT**: Update blood test record
-    - **DELETE**: Remove blood test record
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/blood_tests/{path}")
-
-
-@app.api_route("/users/{user_id}/blood_tests/", methods=["GET", "POST"], tags=["Blood Tests"])
-async def proxy_user_blood_base(user_id: int, request: Request):
-    """
-    User-Specific Blood Tests (Base)
-    
-    Manage blood tests for a specific user.
-    
-    - **GET**: Retrieve all blood tests for a user
-    - **POST**: Create new blood test for a user
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/")
-
-
-@app.api_route("/users/{user_id}/blood_tests/{path:path}", methods=["GET", "POST"], tags=["Blood Tests"])
-async def proxy_user_blood(user_id: int, path: str, request: Request):
-    """
-    User-Specific Blood Tests (With Path)
-    
-    Manage blood tests for a specific user with additional path parameters.
-    
-    - **GET**: Retrieve specific blood test for a user
-    - **POST**: Create new blood test for a user with specific parameters
-    """
-    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/{path}")
-
-
-# Analytics Endpoints
-@app.get("/users/{user_id}/get_health_score", tags=["Analytics"])
-async def proxy_health_score(user_id: int, days: Optional[int] = 30, request: Request = None):
-    """
-    Calculate Health Score
-    
-    Calculate a comprehensive health score for a user based on their recent health data.
-    
-    **Parameters:**
-    - `user_id`: The ID of the user
-    - `days`: Number of days to analyze (default: 30)
-    
-    **Returns:**
-    - Overall health score (0-100)
-    - Individual component scores (physical activity, sleep, blood tests)
-    - Personalized recommendations
-    
-    **Score Components:**
-    - Physical Activity: Based on duration and calories burned
-    - Sleep Quality: Based on hours and quality metrics
-    - Blood Tests: Based on medical reference ranges
-    """
-    async with httpx.AsyncClient() as client:
-        params = dict(request.query_params) if request else {}
-        if days:
-            params["days"] = days
-        resp = await client.get(f"{ANALYTICS_SERVICE_URL}/users/{user_id}/get_health_score", params=params)
-        if resp.status_code != 200:
-            raise HTTPException(status_code=resp.status_code, detail="Failed to calculate health score")
-        return resp.json()
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/physical_activities/")
 
 
 @app.api_route("/users/{user_id}/physical_activities/stats/{period}", methods=["GET"], tags=["Analytics"])
@@ -379,6 +310,111 @@ async def proxy_stats(user_id: int, period: str, request: Request):
         return resp.json()
 
 
+
+
+
+# Sleep Activities Endpoints
+@app.api_route("/sleep_activities/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Sleep Activities"])
+async def proxy_sleep(path: str, request: Request):
+    """
+    Sleep Activities Management
+    
+    Record and analyze sleep patterns, duration, and quality.
+    
+    - **GET**: Retrieve sleep activities
+    - **POST**: Create new sleep activity record
+    - **PUT**: Update sleep activity record
+    - **DELETE**: Remove sleep activity record
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/sleep_activities/{path}")
+
+
+@app.get("/users/{user_id}/sleep_activities/", tags=["Sleep Activities"])
+async def proxy_user_sleep_get(user_id: int, request: Request):
+    """
+    Get all sleep activities for a specific user.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/")
+
+
+@app.post("/users/{user_id}/sleep_activities/", tags=["Sleep Activities"])
+async def proxy_user_sleep_post(user_id: int, request: Request):
+    """
+    Create a new sleep activity for a specific user.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/sleep_activities/")
+
+
+
+
+
+# Blood Tests Endpoints
+@app.api_route("/blood_tests/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Blood Tests"])
+async def proxy_blood(path: str, request: Request):
+    """
+    Blood Tests Management
+    
+    Store and manage blood test results with values and measurement units.
+    
+    - **GET**: Retrieve blood tests
+    - **POST**: Create new blood test record
+    - **PUT**: Update blood test record
+    - **DELETE**: Remove blood test record
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/blood_tests/{path}")
+
+
+@app.get("/users/{user_id}/blood_tests/", tags=["Blood Tests"])
+async def proxy_user_blood_get(user_id: int, request: Request):
+    """
+    Get all blood tests for a specific user.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/")
+
+
+@app.post("/users/{user_id}/blood_tests/", tags=["Blood Tests"])
+async def proxy_user_blood_post(user_id: int, request: Request):
+    """
+    Create a new blood test for a specific user.
+    """
+    return await _proxy(request, f"{HEALTH_DATA_SERVICE_URL}/users/{user_id}/blood_tests/")
+
+
+
+
+
+# Analytics Endpoints
+@app.get("/users/{user_id}/get_health_score", tags=["Analytics"])
+async def proxy_health_score(user_id: int, days: Optional[int] = 30, request: Request = None):
+    """
+    Calculate Health Score
+    
+    Calculate a comprehensive health score for a user based on their recent health data.
+    
+    **Parameters:**
+    - `user_id`: The ID of the user
+    - `days`: Number of days to analyze (default: 30)
+    
+    **Returns:**
+    - Overall health score (0-100)
+    - Individual component scores (physical activity, sleep, blood tests)
+    - Personalized recommendations
+    
+    **Score Components:**
+    - Physical Activity: Based on duration and calories burned
+    - Sleep Quality: Based on hours and quality metrics
+    - Blood Tests: Based on medical reference ranges
+    """
+    async with httpx.AsyncClient() as client:
+        params = dict(request.query_params) if request else {}
+        if days:
+            params["days"] = days
+        resp = await client.get(f"{ANALYTICS_SERVICE_URL}/users/{user_id}/get_health_score", params=params)
+        if resp.status_code != 200:
+            raise HTTPException(status_code=resp.status_code, detail="Failed to calculate health score")
+        return resp.json()
+
+
 # External Integration Endpoints
 @app.get("/fhir_patient/{patient_id}", tags=["External Integration"])
 async def proxy_fhir(patient_id: str):
@@ -409,6 +445,22 @@ async def proxy_fhir(patient_id: str):
             raise HTTPException(status_code=503, detail=f"FHIR service error: {str(e)}")
 
 
+# User Management Endpoints (catch-all route - must be last)
+@app.api_route("/users/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["User Management"])
+async def proxy_users(path: str, request: Request):
+    """
+    User Management Operations
+    
+    - **GET**: Retrieve user information
+    - **POST**: Create a new user account
+    - **PUT**: Update existing user information
+    - **DELETE**: Remove a user account
+    
+    All user-related operations are handled by the User Service.
+    """
+    return await _proxy(request, f"{USER_SERVICE_URL}/users/{path}")
+
+
 # Internal proxy function
 async def _proxy(request: Request, url: str):
     """
@@ -418,21 +470,15 @@ async def _proxy(request: Request, url: str):
     headers = dict(request.headers)
     data = await request.body()
     
-    print(f"DEBUG: Proxying {method} request to {url}")
-    
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.request(method, url, headers=headers, content=data, params=dict(request.query_params), timeout=30.0)
-            print(f"DEBUG: Response status: {resp.status_code}")
             if resp.status_code >= 400:
-                print(f"DEBUG: Error response: {resp.text}")
                 raise HTTPException(status_code=resp.status_code, detail=f"Service error: {resp.text}")
             return resp.json()
         except httpx.TimeoutException:
-            print("DEBUG: Timeout exception")
             raise HTTPException(status_code=504, detail="Service timeout")
         except Exception as e:
-            print(f"DEBUG: Exception: {str(e)}")
             raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
 
 
