@@ -2,7 +2,7 @@
 
 This is a comprehensive Health Tracker Application built with a microservices architecture using FastAPI. It allows users to track and analyze their health data, including Physical Activity, Sleep Activity, and Blood Tests. The application provides health score calculations, statistics, and integrates with external FHIR-based APIs.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The application is built using a microservices architecture with 6 independent services:
 
@@ -13,7 +13,7 @@ The application is built using a microservices architecture with 6 independent s
 5. **Analytics Service** - Calculates health scores and statistics
 6. **Integration Service** - Handles external FHIR API integration
 
-## ✨ Features
+## Features
 
 - **User Management**: Complete CRUD operations for user accounts
 - **Health Data Tracking**: Record and manage physical activities, sleep patterns, and blood test results
@@ -22,7 +22,7 @@ The application is built using a microservices architecture with 6 independent s
 - **FHIR Integration**: External API integration for healthcare data standards
 - **Microservices Architecture**: Scalable, maintainable, and team-friendly development approach
 
-## 🗄️ Database Schema
+## Database Schema
 
 Each service owns its data with separate PostgreSQL databases:
 
@@ -33,7 +33,7 @@ Each service owns its data with separate PostgreSQL databases:
   - `sleep_activities` (id, user_id, hours, quality, date)
   - `blood_tests` (id, user_id, test_name, value, units_id, date)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -72,7 +72,7 @@ Each service owns its data with separate PostgreSQL databases:
 - **Analytics Service**: 8004
 - **Integration Service**: 8005
 
-## 📋 API Endpoints
+## API Endpoints
 
 ### User Management
 - `POST /users/` - Create a new user
@@ -104,7 +104,7 @@ Each service owns its data with separate PostgreSQL databases:
 ### External Integration
 - `GET /fhir_patient/{patient_id}` - Fetch FHIR patient data
 
-## 🔧 Development
+## Development
 
 ### Service Communication
 
@@ -135,7 +135,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
 
-## 📊 Health Score Calculation
+## Health Score Calculation
 
 The analytics service calculates health scores based on:
 - **Physical Activity**: Duration and calories burned
@@ -158,7 +158,7 @@ View service logs:
 docker-compose logs -f [service-name]
 ```
 
-## 🛠️ Production Considerations
+## Production Considerations
 
 - **Authentication/Authorization**: Implement JWT or OAuth2
 - **Service Mesh**: Use Istio or Linkerd for advanced routing
@@ -167,43 +167,10 @@ docker-compose logs -f [service-name]
 - **Message Queue**: Use RabbitMQ or Kafka for async communication
 - **Secrets Management**: Use Docker Secrets or external vault
 
-## 🏥 FHIR Integration
+## FHIR Integration
 
 The integration service connects to external FHIR servers:
 - **Patient Resources**: Fetch patient information
 - **Observation Resources**: Health score output in FHIR format
 - **Error Handling**: Graceful degradation when external services are unavailable
 
-## 📈 Benefits of Microservices
-
-- **Scalability**: Scale individual services based on demand
-- **Team Development**: Different teams can work on different services
-- **Technology Flexibility**: Each service can use different technologies
-- **Fault Isolation**: Issues in one service don't affect others
-- **Deployment Independence**: Deploy services independently
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **Service not starting**: Check Docker logs
-   ```bash
-   docker-compose logs [service-name]
-   ```
-
-2. **Database connection issues**: Ensure PostgreSQL containers are running
-   ```bash
-   docker-compose ps
-   ```
-
-3. **Service communication errors**: Verify environment variables in docker-compose.yml
-
-### Reset Everything
-```bash
-docker-compose down -v
-docker-compose up -d
-```
-
-## 📝 License
-
-This project is licensed under the MIT License.
