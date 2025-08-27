@@ -1,4 +1,4 @@
-# Health Tracker App - Microservices Architecture
+# Health Tracker App
 
 This is a comprehensive Health Tracker Application built with a microservices architecture using FastAPI. It allows users to track and analyze their health data, including Physical Activity, Sleep Activity, and Blood Tests. The application provides health score calculations, statistics, and integrates with external FHIR-based APIs.
 
@@ -163,4 +163,109 @@ The integration service connects to external FHIR servers:
 - **Patient Resources**: Fetch patient information
 - **Observation Resources**: Health score output in FHIR format
 - **Error Handling**: Graceful degradation when external services are unavailable
+
+### Configuring New FHIR Connections
+
+The FHIR integration is configured through environment variables in the `integration-service`. Here's how to add new FHIR server connections:
+
+#### Method 1: Environment Variables (Recommended)
+
+Add FHIR configuration to your `docker-compose.yml`:
+
+```yaml
+integration-service:
+  build: ./integration-service
+  environment:
+    FHIR_SERVER_URL: https://your-fhir-server.com/baseR4
+    FHIR_REQUEST_TIMEOUT: 30
+    FHIR_MAX_RETRIES: 3
+```
+
+#### Method 2: Multiple FHIR Servers
+
+For multiple FHIR servers, you can configure them using different environment variables:
+
+```yaml
+integration-service:
+  build: ./integration-service
+  environment:
+    # Primary FHIR server
+    FHIR_SERVER_URL: https://primary-fhir-server.com/baseR4
+    FHIR_REQUEST_TIMEOUT: 30
+    FHIR_MAX_RETRIES: 3
+    
+    # Secondary FHIR server (for failover)
+    FHIR_SERVER_URL_BACKUP: https://backup-fhir-server.com/baseR4
+    FHIR_REQUEST_TIMEOUT_BACKUP: 45
+    FHIR_MAX_RETRIES_BACKUP: 5
+```
+
+#### Method 3: Authentication
+
+For FHIR servers requiring authentication, add the necessary headers:
+
+```yaml
+integration-service:
+  build: ./integration-service
+  environment:
+    FHIR_SERVER_URL: https://secure-fhir-server.com/baseR4
+    FHIR_REQUEST_TIMEOUT: 30
+    FHIR_MAX_RETRIES: 3
+    FHIR_AUTH_TOKEN: your-access-token
+    FHIR_API_KEY: your-api-key
+```
+
+#### Configuration Options
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `FHIR_SERVER_URL` | `https://hapi.fhir.org/baseR4` | FHIR server base URL |
+| `FHIR_REQUEST_TIMEOUT` | `30` | Request timeout in seconds |
+| `FHIR_MAX_RETRIES` | `3` | Maximum retry attempts |
+| `FHIR_AUTH_TOKEN` | `None` | OAuth2 access token |
+| `FHIR_API_KEY` | `None` | API key for authentication |
+
+#### Testing FHIR Connections
+
+1. **Test basic connectivity**:
+   ```bash
+   curl http://localhost:8080/fhir_patient/example
+   ```
+
+2. **Test with your FHIR server**:
+   ```bash
+   curl http://localhost:8080/fhir_patient/your-patient-id
+   ```
+
+3. **Check FHIR server status**:
+   ```bash
+   curl http://localhost:8080/fhir_server_status
+   ```
+
+#### Common FHIR Server URLs
+
+- **HAPI FHIR (Public)**: `https://hapi.fhir.org/baseR4`
+- **HAPI FHIR (Test)**: `https://test.fhir.org/baseR4`
+- **Microsoft FHIR**: `https://your-tenant.azurehealthcareapis.com`
+- **AWS HealthLake**: `https://your-healthlake.region.amazonaws.com`
+- **Google Healthcare API**: `https://healthcare.googleapis.com/v1/projects/your-project/locations/your-location/datasets/your-dataset/fhirStores/your-store`
+
+#### Error Handling
+
+The FHIR integration includes robust error handling:
+- **Timeout handling**: Configurable timeouts with retry logic
+- **Authentication errors**: Proper handling of 401/403 responses
+- **Network errors**: Graceful degradation when servers are unavailable
+- **Data parsing**: Safe parsing of FHIR responses with fallback values
+
+#### Customizing FHIR Data Parsing
+
+To customize how FHIR data is parsed, modify the `parse_fhir_patient` function in `integration-service/app/main.py`:
+
+```python
+def parse_fhir_patient(fhir_data: Dict[str, Any], patient_id: str) -> FHIRPatientResponse:
+    # Customize parsing logic here
+    # Add your specific FHIR resource handling
+    pass
+```
 
